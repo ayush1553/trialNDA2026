@@ -6,6 +6,8 @@
 .exam-body {
     background: linear-gradient(135deg, #0f172a, #1e3a8a 40%, #2563eb);
     height: 100vh;
+    height: 100dvh;
+    /* Dynamic Viewport Height for Mobile */
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -128,6 +130,8 @@
     /* Lift it off background */
     z-index: 10;
     /* Layer 2 */
+    padding-bottom: 90px;
+    /* Ensure content clears the Action Bar */
 }
 
 .question-header {
@@ -437,7 +441,8 @@
     align-items: center;
     justify-content: center;
     padding: 0 16px;
-    z-index: 1000;
+    z-index: 2005;
+    /* High enough to be above everything */
     /* Layer 4 */
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
 }
@@ -818,28 +823,36 @@
     }
 
     .question-text {
-        font-size: 16px; /* Slightly smaller for better fit */
+        font-size: 16px;
+        /* Slightly smaller for better fit */
     }
 
     /* Fix Action Bar Overflow */
     .action-bar {
         padding: 8px 10px;
-        height: 64px; /* Compact height */
+        height: 64px;
+        /* Compact height */
     }
 
     .action-buttons-container {
-        display: flex; /* Flex is better than grid for this space */
+        display: flex;
+        /* Flex is better than grid for this space */
         grid-template-columns: none;
-        gap: 6px; /* Tight gap */
+        gap: 6px;
+        /* Tight gap */
         width: 100%;
     }
 
     .btn-action {
-        flex: 1; /* Equal width */
-        padding: 0 2px; /* Minimal padding */
-        font-size: 11px; /* Readable but small */
+        flex: 1;
+        /* Equal width */
+        padding: 0 2px;
+        /* Minimal padding */
+        font-size: 11px;
+        /* Readable but small */
         height: 40px;
-        white-space: normal; /* Allow wrapping */
+        white-space: normal;
+        /* Allow wrapping */
         line-height: 1.1;
         text-align: center;
         border-radius: 8px;
@@ -847,7 +860,8 @@
 
     /* Specific Tweaks */
     .btn-mark-next {
-        font-size: 10px; /* Longest text needs smallest font */
+        font-size: 10px;
+        /* Longest text needs smallest font */
     }
 }
 
