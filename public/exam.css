@@ -818,11 +818,36 @@
     }
 
     .question-text {
-        font-size: 17px;
+        font-size: 16px; /* Slightly smaller for better fit */
     }
 
-    .btn-save.btn-primary {
-        padding: 10px 16px !important;
+    /* Fix Action Bar Overflow */
+    .action-bar {
+        padding: 8px 10px;
+        height: 64px; /* Compact height */
+    }
+
+    .action-buttons-container {
+        display: flex; /* Flex is better than grid for this space */
+        grid-template-columns: none;
+        gap: 6px; /* Tight gap */
+        width: 100%;
+    }
+
+    .btn-action {
+        flex: 1; /* Equal width */
+        padding: 0 2px; /* Minimal padding */
+        font-size: 11px; /* Readable but small */
+        height: 40px;
+        white-space: normal; /* Allow wrapping */
+        line-height: 1.1;
+        text-align: center;
+        border-radius: 8px;
+    }
+
+    /* Specific Tweaks */
+    .btn-mark-next {
+        font-size: 10px; /* Longest text needs smallest font */
     }
 }
 
