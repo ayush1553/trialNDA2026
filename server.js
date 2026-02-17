@@ -11,10 +11,7 @@ const PORT = process.env.PORT || 3000;
 // Serve static files from public directory (for local development)
 // Serve static files from public directory (for local development)
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/data', (req, res, next) => {
-    console.log(`[DATA REQUEST] ${req.method} ${req.url}`);
-    next();
-}, express.static(path.join(__dirname, 'data')));
+// Data is now served from public/data via the static middleware above
 
 
 // Supabase Configuration
