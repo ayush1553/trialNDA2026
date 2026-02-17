@@ -438,11 +438,31 @@
                 const date = new Date(a.submitted_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
                 const timeStr = Math.floor(a.time_taken / 60) + 'm ' + (a.time_taken % 60) + 's';
                 const accClass = a.accuracy >= 80 ? 'success' : 'danger';
+                const maxScore = a.max_score || 300; // Fallback to 300 if missing for old data
+
+                // Dynamic Name Formatting
+                let testName = `NDA ${a.year || ''} ${a.subject || ''}`;
+                
+                if (a.test_type === 'Mock') {
+                     // "Mock Test Math 01"
+                     const subShort = (a.subject === 'Mathematics') ? 'Math' : 'GAT';
+                     testName = `Mock Test ${subShort} ${a.session || '01'}`;
+                } else if (a.test_type === 'ChapterTest') {
+                     // "Chapter Test English 02"
+                     // Extract number from test_id (e.g. ct_ct01...) or Chapter slug
+                     const match = a.test_id && a.test_id.match(/ct(\d+)/i);
+                     const num = match ? match[1] : '';
+                     testName = `Chapter Test ${a.subject} ${num}`;
+                } else {
+                     // PYQ: "NDA 2025 1 MAT"
+                     const subShort = (a.subject === 'Mathematics') ? 'MAT' : (a.subject === 'GAT' ? 'GAT' : a.subject);
+                     testName = `NDA ${a.year} ${a.session} ${subShort}`;
+                }
 
                 return `
                     <tr>
-                        <td><strong>NDA ${a.session || ''} ${a.year}</strong> - ${a.subject}</td>
-                        <td><span style="font-weight:700">${a.score}</span> / 300</td>
+                        <td><strong>${testName}</strong></td>
+                        <td><span style="font-weight:700">${a.score}</span> / ${maxScore}</td>
                         <td><span class="badge ${accClass}">${a.accuracy}%</span></td>
                         <td>${timeStr}</td>
                         <td style="opacity:0.7">${date}</td>
