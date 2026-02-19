@@ -266,22 +266,17 @@
         // Mock data
         const caData = {
             'Monthly': [
-                { id: 1, title: 'March 2026 - Monthly Capsule', date: 'March 2026', type: 'Capsule', readTime: '45 mins' },
-                { id: 2, title: 'February 2026 - Monthly Capsule', date: 'February 2026', type: 'Capsule', readTime: '40 mins' },
-                { id: 3, title: 'January 2026 - Monthly Capsule', date: 'January 2026', type: 'Capsule', readTime: '42 mins' },
-                { id: 4, title: 'December 2025 - Monthly Capsule', date: 'December 2025', type: 'Capsule', readTime: '38 mins' },
-                { id: 5, title: 'November 2025 - Monthly Capsule', date: 'November 2025', type: 'Capsule', readTime: '40 mins' },
+                // January Parts
+                { id: 301, title: 'January 2026 - Week 1', date: 'Jan 1-7, 2026', type: 'Monthly', readTime: '15 mins', file: 'data/current_affairs/monthly/ct01_january1.js' },
+                { id: 302, title: 'January 2026 - Week 2', date: 'Jan 8-14, 2026', type: 'Monthly', readTime: '15 mins', file: 'data/current_affairs/monthly/ct02_january2.js' },
+                { id: 303, title: 'January 2026 - Week 3', date: 'Jan 15-21, 2026', type: 'Monthly', readTime: '15 mins', file: 'data/current_affairs/monthly/ct03_january3.js' },
+                { id: 304, title: 'January 2026 - Week 4', date: 'Jan 22-31, 2026', type: 'Monthly', readTime: '15 mins', file: 'data/current_affairs/monthly/ct04_january4.js' },
             ],
             'Daily': [
                 { id: 101, title: '19th February 2026 - Daily Updates', date: '19 Feb 2026', type: 'Daily', readTime: '10 mins', file: 'data/current_affairs/daily/19_02_2026.js' },
-                { id: 102, title: '18th February 2026 - Daily Updates', date: '18 Feb 2026', type: 'Daily', readTime: '12 mins', file: null },
             ],
             'Topic': [
-                { id: 201, title: 'Defence Exercises 2026', date: 'Updated: Apr 2026', type: 'Topic', readTime: '20 mins' },
-                { id: 202, title: 'International Summits (G20, G7)', date: 'Updated: Mar 2026', type: 'Topic', readTime: '25 mins' },
-                { id: 203, title: 'Awards and Honours 2025-26', date: 'Updated: Feb 2026', type: 'Topic', readTime: '30 mins' },
-                { id: 204, title: 'Science & Technology Developments', date: 'Updated: Jan 2026', type: 'Topic', readTime: '22 mins' },
-                { id: 205, title: 'Sports Current Affairs', date: 'Updated: Mar 2026', type: 'Topic', readTime: '15 mins' },
+                // Coming soon
             ]
         };
 
@@ -308,7 +303,7 @@
 
             container.innerHTML = data.map(item => {
                 let checkClickAction = '';
-                if (tab === 'Daily' && item.file) {
+                if (item.file) {
                     // Redirect to Instructions Page for GAT-style test
                     checkClickAction = `onclick="window.location.href='instructions.html?type=CurrentAffairs&date=${item.date}&file=${item.file}'"`;
                 } else {

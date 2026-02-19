@@ -1081,3 +1081,45 @@ body.analysis-theme {
     opacity: 1 !important;
     visibility: visible !important;
 }
+
+/* --- SOLUTION TOGGLE BUTTON --- */
+.toggle-sol-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    margin-top: 16px;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+}
+
+.toggle-sol-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #FFFFFF;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.toggle-sol-btn i {
+    font-size: 12px;
+}
+
+.solution-block {
+    margin-top: 12px;
+    padding: 16px;
+    background: rgba(16, 185, 129, 0.05);
+    /* Very subtle green tint */
+    border: 1px solid rgba(16, 185, 129, 0.1);
+    border-radius: 12px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.solution-reveal-container {
+    animation: fadeIn 0.3s ease-out;
+}

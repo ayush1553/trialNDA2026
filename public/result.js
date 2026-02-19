@@ -93,9 +93,35 @@ async function loadQuestions() {
             src = `data/${folder}/${slug}.js`;
 
         } else if (type === 'CurrentAffairs') {
-            // Test ID format: ca_19_02_2026
-            const dateStr = testResult.test_id.replace(/^ca_/, ''); // 19_02_2026
-            src = `data/current_affairs/daily/${dateStr}.js`;
+            // Test ID format: ca_19_02_2026 OR ca_19 Feb 2026 (Legacy/Bug fix)
+            let dateStr = testResult.test_id.replace(/^ca_/, '');
+
+            // FIX: If test_id accidentally included the full path, extract just the filename
+            if (dateStr.includes('/')) {
+                dateStr = dateStr.split('/').pop();
+            }
+
+            // Fix for "19 Feb 2026" -> "19_02_2026"
+            if (dateStr.includes(' ')) {
+                const parts = dateStr.split(' ');
+                if (parts.length === 3) {
+                    const months = {
+                        'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06',
+                        'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
+                    };
+                    const day = parts[0].padStart(2, '0');
+                    const mon = months[parts[1].substring(0, 3)] || '01';
+                    const yr = parts[2];
+                    dateStr = `${day}_${mon}_${yr}`;
+                }
+            }
+
+            if (dateStr.startsWith('ct') || dateStr.match(/[a-z]/i)) {
+                // Heuristic: If it starts with 'ct' or has letters (january), it's likely monthly/capsule
+                src = `data/current_affairs/monthly/${dateStr}.js`;
+            } else {
+                src = `data/current_affairs/daily/${dateStr}.js`;
+            }
         } else {
             // PYQ
             src = `data/questions/${subj}_${yr}_${sess}.js`;
@@ -106,18 +132,27 @@ async function loadQuestions() {
         const script = document.createElement('script');
         script.src = src;
         script.onload = () => {
-            // Normalize Current Affairs Data if needed (Same logic as exam.html)
-            if (type === 'CurrentAffairs' && window.questionsData && !Array.isArray(window.questionsData)) {
+            // Normalize Current Affairs Data if needed
+            // NOTE: 'type' from outer scope
+            if (type === 'CurrentAffairs' && window.questionsData) {
+                let rawData = [];
+                // Check if it's the old object format {mcqs: []} or new array format []
                 if (window.questionsData.mcqs) {
-                    const rawMcqs = window.questionsData.mcqs;
-                    window.questionsData = rawMcqs.map((q, idx) => ({
-                        id: q.questionId || (idx + 1),
-                        text: q.question,
+                    rawData = window.questionsData.mcqs;
+                } else if (Array.isArray(window.questionsData)) {
+                    rawData = window.questionsData;
+                }
+
+                if (rawData.length > 0) {
+                    // Map to Exam Engine Format
+                    window.questionsData = rawData.map((q, idx) => ({
+                        id: q.questionId || q.id || (idx + 1),
+                        text: q.question || q.text,
                         options: q.options,
-                        correctAnswer: q.answer,
+                        correctAnswer: q.answer || q.correctAnswer,
                         solution: q.solution,
-                        marks: 4.0,
-                        negMarks: -1.33
+                        marks: q.marks || 4.0,
+                        negMarks: q.negMarks || -1.33
                     }));
                 }
             }
@@ -196,7 +231,11 @@ function reattemptTest() {
         const date = testResult.test_id.replace('ca_', '');
         params.append('date', date);
         // We need 'file' param too. Reconstruct it.
-        params.append('file', `data/current_affairs/daily/${date}.js`);
+        if (date.startsWith('ct') || date.match(/[a-z]/i)) {
+            params.append('file', `data/current_affairs/monthly/${date}.js`);
+        } else {
+            params.append('file', `data/current_affairs/daily/${date}.js`);
+        }
 
     } else {
         // Standard PYQ
@@ -255,15 +294,91 @@ function renderSolutions(filter = 'all') {
 
         const card = document.createElement('div');
         card.className = 'solution-card';
+        // Make the whole card clickable to open review mode at this question
+        card.style.cursor = 'pointer';
+
+        // Construct Review URL
+        let reviewUrl = `exam.html?review=true&q=${actualIndex}`;
+        if (testResult.test_type === 'CurrentAffairs') {
+            // Extract date and file from testID or reconstruct. 
+            // test_id: "ca_19_02_2026" OR "ca_data/current_affairs/daily/19_02_2026"
+            let dateStr = testResult.test_id.replace(/^ca_/, '');
+
+            // FIX: If test_id accidentally included the full path, extract just the filename
+            if (dateStr.includes('/')) {
+                dateStr = dateStr.split('/').pop();
+            }
+
+            // Fix for "19 Feb 2026" -> "19_02_2026"
+            if (dateStr.includes(' ')) {
+                const parts = dateStr.split(' ');
+                if (parts.length === 3) {
+                    const months = {
+                        'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06',
+                        'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
+                    };
+                    const day = parts[0].padStart(2, '0');
+                    const mon = months[parts[1].substring(0, 3)] || '01';
+                    const yr = parts[2];
+                    dateStr = `${day}_${mon}_${yr}`;
+                }
+            }
+
+            let fileSrc = `data/current_affairs/daily/${dateStr}.js`;
+            if (dateStr.startsWith('ct') || dateStr.match(/[a-z]/i)) {
+                fileSrc = `data/current_affairs/monthly/${dateStr}.js`;
+            }
+
+            reviewUrl += `&type=CurrentAffairs&date=${dateStr}&file=${fileSrc}`;
+        } else if (testResult.test_type === 'ChapterTest') {
+            const slug = testResult.test_id.replace(/^ct_/, '');
+            reviewUrl += `&type=ChapterTest&chapter=${slug}&subject=${testResult.subject || 'Mathematics'}`;
+        } else if (testResult.test_type === 'Mock') {
+            const slug = testResult.test_id.replace(/^mock_/, '');
+            reviewUrl += `&type=Mock&slug=${slug}&subject=${testResult.subject || 'Mathematics'}`;
+        } else {
+            // PYQ
+            reviewUrl += `&year=${testResult.year}&session=${testResult.session}&subject=${testResult.subject}`;
+        }
+
+        card.onclick = () => {
+            window.location.href = reviewUrl;
+        };
+
         card.innerHTML = `
             <div class="card-header">
                 <div class="question-meta">
-                    <div class="question-number ${statusClass}">${actualIndex + 1}</div>
+                    <div class="question-number ${statusClass}">Q${actualIndex + 1}</div>
                     ${res.timeSpent ? `<div class="time-badge"><i class="fa-regular fa-clock"></i> ${formatTime(res.timeSpent)}</div>` : ''}
                 </div>
-                <i class="fa-regular fa-bookmark bookmark"></i>
+                <div class="review-link"><i class="fa-solid fa-up-right-from-square"></i> Open View</div>
             </div>
             <div class="question-text">${q.text}</div>
+            
+            <button class="toggle-sol-btn" onclick="toggleSolution(this)">
+                <i class="fa-regular fa-eye"></i> Show Answer & Solution
+            </button>
+
+            <div class="solution-reveal-container" style="display: none;">
+                <div class="options-display">
+                    ${Object.entries(q.options || {}).map(([key, val]) => {
+            let optClass = '';
+            if (key === q.correctAnswer) optClass = 'correct';
+            if (key === res.userAnswer && key !== q.correctAnswer) optClass = 'incorrect';
+            return `<div class="opt-row ${optClass}">
+                            <span class="opt-key">${key}</span>
+                            <span class="opt-val">${val}</span>
+                        </div>`;
+        }).join('')}
+                </div>
+    
+                ${q.solution ? `
+                    <div class="solution-block">
+                        <h4><i class="fa-solid fa-lightbulb"></i> Solution</h4>
+                        <p>${q.solution}</p>
+                    </div>
+                ` : ''}
+            </div>
         `;
 
         container.appendChild(card);
@@ -758,6 +873,16 @@ if (document.readyState === 'loading') {
 function toggleSidebar() {
     const sb = document.querySelector(".app-glass-sidebar");
     const ov = document.querySelector(".app-sidebar-overlay");
-    if (sb) sb.classList.toggle("active");
     if (ov) ov.classList.toggle("active");
+}
+
+function toggleSolution(btn) {
+    const block = btn.nextElementSibling;
+    if (block.style.display === 'none') {
+        block.style.display = 'block';
+        btn.innerHTML = '<i class="fa-regular fa-eye-slash"></i> Hide Answer & Solution';
+    } else {
+        block.style.display = 'none';
+        btn.innerHTML = '<i class="fa-regular fa-eye"></i> Show Answer & Solution';
+    }
 }

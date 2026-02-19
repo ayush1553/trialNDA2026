@@ -262,19 +262,25 @@
             console.log("Questions data loaded:", type);
 
             // Normalize Current Affairs Data if needed
-            if (type === 'CurrentAffairs' && window.questionsData && !Array.isArray(window.questionsData)) {
-                // It's in format {date: "...", mcqs: [ ... ] }
+            if (type === 'CurrentAffairs' && window.questionsData) {
+                let rawData = [];
+                // Check if it's the old object format {mcqs: []} or new array format []
                 if (window.questionsData.mcqs) {
-                    const rawMcqs = window.questionsData.mcqs;
+                    rawData = window.questionsData.mcqs;
+                } else if (Array.isArray(window.questionsData)) {
+                    rawData = window.questionsData;
+                }
+
+                if (rawData.length > 0) {
                     // Map to Exam Engine Format
-                    window.questionsData = rawMcqs.map((q, idx) => ({
-                        id: q.questionId || (idx + 1),
-                        text: q.question, // Map 'question' to 'text'
+                    window.questionsData = rawData.map((q, idx) => ({
+                        id: q.questionId || q.id || (idx + 1),
+                        text: q.question || q.text, // Map 'question' to 'text'
                         options: q.options,
-                        correctAnswer: q.answer,
+                        correctAnswer: q.answer || q.correctAnswer, // Map 'answer' to 'correctAnswer'
                         solution: q.solution,
-                        marks: 4.0,     // Default GAT marks
-                        negMarks: -1.33 // Default GAT neg marks
+                        marks: q.marks || 4.0,     // Default GAT marks
+                        negMarks: q.negMarks || -1.33 // Default GAT neg marks
                     }));
                 }
             }

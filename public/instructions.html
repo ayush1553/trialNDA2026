@@ -165,6 +165,17 @@
                 document.getElementById('disp-duration-alt').textContent = '150';
                 document.getElementById('disp-correct-marks').textContent = '2.5';
             }
+        } else if (type === 'CurrentAffairs') {
+            // Current Affairs UI logic
+            const dateStr = urlParams.get('date') || 'Daily';
+            document.getElementById('exam-title-display').textContent = `Current Affairs: ${dateStr}`;
+            document.getElementById('exam-date-display').textContent = `General Awareness Test`;
+
+            document.getElementById('disp-questions').textContent = '10-20'; // Variable
+            document.getElementById('disp-marks').textContent = '40-80';
+            document.getElementById('disp-duration').textContent = '15';
+            document.getElementById('disp-duration-alt').textContent = '15';
+            document.getElementById('disp-correct-marks').textContent = '4.0';
         } else {
             // PYQ UI logic (Existing)
             const sessions = { '1': { 'roman': 'I', 'date': '13 Apr' }, '2': { 'roman': 'II', 'date': '14 Sept' } };

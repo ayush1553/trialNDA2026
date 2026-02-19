@@ -8,8 +8,12 @@ if (!questionsData || questionsData.length === 0) {
     alert("Error loading questions. Please try again.");
 }
 
+// Check for Review Mode
+const urlParams = new URLSearchParams(window.location.search);
+const isReviewMode = urlParams.get('review') === 'true';
+
 // 2. State Management
-let currentQuestionIndex = 0;
+let currentQuestionIndex = parseInt(urlParams.get('q')) || 0;
 let startTime = Date.now(); // Track Start Time
 // State: 'not-visited', 'not-answered', 'answered', 'marked', 'marked-answered'
 // answer: selected key (e.g. 'A') or null
@@ -23,11 +27,6 @@ let userResponses = questionsData.map(q => ({
     isStarred: false
 }));
 
-// Check for Review Mode
-const urlParams = new URLSearchParams(window.location.search);
-const isReviewMode = urlParams.get('review') === 'true';
-
-// Normal Mode Timer Initialization
 // Normal Mode Timer Initialization
 const currentTestType = urlParams.get('type') || 'PYQ';
 let timeRemaining = (currentTestType === 'ChapterTest') ? 13 * 60 : 2 * 60 * 60 + 30 * 60; // Default 150 mins
@@ -249,6 +248,19 @@ function renderQuestion(index) {
         if (i === index) btn.classList.add('current');
         else btn.classList.remove('current');
     });
+
+    // Valid Solution Display in Review Mode
+    if (isReviewMode && q.solution) {
+        const solDiv = document.createElement('div');
+        solDiv.className = 'review-solution-block';
+        solDiv.innerHTML = `
+            <div style="margin-top: 20px; padding: 15px; background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; border-radius: 4px; color: #fff;">
+                <h4 style="margin: 0 0 10px 0; color: #60a5fa;"><i class="fa-solid fa-lightbulb"></i> Solution</h4>
+                <p style="margin: 0; line-height: 1.6; font-size: 0.95rem;">${q.solution}</p>
+            </div>
+        `;
+        optionsContainer.appendChild(solDiv);
+    }
 }
 
 /**
@@ -605,7 +617,7 @@ async function finishTest() {
         user_id: session ? session.id : 'guest',
         test_id: currentTestType === 'ChapterTest' ? `ct_${urlParams.get('chapter')}` :
             (currentTestType === 'Mock' ? `mock_${urlParams.get('slug')}` :
-                (currentTestType === 'CurrentAffairs' ? `ca_${urlParams.get('date').replace(/-/g, '_')}` : `nda_${urlParams.get('year') || '2022'}_${urlParams.get('session') || '2'}`)),
+                (currentTestType === 'CurrentAffairs' ? `ca_${(urlParams.get('file') ? urlParams.get('file').split('/').pop() : urlParams.get('date')).replace('.js', '').replace(/-/g, '_')}` : `nda_${urlParams.get('year') || '2022'}_${urlParams.get('session') || '2'}`)),
         test_type: currentTestType,
         subject: urlParams.get('subject') || 'Mathematics',
         year: currentTestType === 'Mock' ? '2026' : (urlParams.get('year') || '2022'),
