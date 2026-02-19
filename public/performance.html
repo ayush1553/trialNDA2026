@@ -313,6 +313,7 @@
                 <li><a href="chapter_tests.html"><i class="fa-solid fa-book-open icon"></i> Chapter Tests</a></li>
                 <li><a href="performance.html"><i class="fa-solid fa-chart-simple icon"></i> Performance Analysis</a>
                 </li>
+                <li><a href="current-affairs.html"><i class="fa-solid fa-newspaper icon"></i> Current Affairs</a></li>
 
                 <li id="login-link"><a href="login.html"><i class="fa-solid fa-right-to-bracket icon"></i> Login</a>
                 </li>
@@ -442,21 +443,21 @@
 
                 // Dynamic Name Formatting
                 let testName = `NDA ${a.year || ''} ${a.subject || ''}`;
-                
+
                 if (a.test_type === 'Mock') {
-                     // "Mock Test Math 01"
-                     const subShort = (a.subject === 'Mathematics') ? 'Math' : 'GAT';
-                     testName = `Mock Test ${subShort} ${a.session || '01'}`;
+                    // "Mock Test Math 01"
+                    const subShort = (a.subject === 'Mathematics') ? 'Math' : 'GAT';
+                    testName = `Mock Test ${subShort} ${a.session || '01'}`;
                 } else if (a.test_type === 'ChapterTest') {
-                     // "Chapter Test English 02"
-                     // Extract number from test_id (e.g. ct_ct01...) or Chapter slug
-                     const match = a.test_id && a.test_id.match(/ct(\d+)/i);
-                     const num = match ? match[1] : '';
-                     testName = `Chapter Test ${a.subject} ${num}`;
+                    // "Chapter Test English 02"
+                    // Extract number from test_id (e.g. ct_ct01...) or Chapter slug
+                    const match = a.test_id && a.test_id.match(/ct(\d+)/i);
+                    const num = match ? match[1] : '';
+                    testName = `Chapter Test ${a.subject} ${num}`;
                 } else {
-                     // PYQ: "NDA 2025 1 MAT"
-                     const subShort = (a.subject === 'Mathematics') ? 'MAT' : (a.subject === 'GAT' ? 'GAT' : a.subject);
-                     testName = `NDA ${a.year} ${a.session} ${subShort}`;
+                    // PYQ: "NDA 2025 1 MAT"
+                    const subShort = (a.subject === 'Mathematics') ? 'MAT' : (a.subject === 'GAT' ? 'GAT' : a.subject);
+                    testName = `NDA ${a.year} ${a.session} ${subShort}`;
                 }
 
                 return `
