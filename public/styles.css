@@ -2093,4 +2093,41 @@ ul {
         margin-top: 6px;
         font-size: 9px;
     }
+
+    /* Mission Card Optimization */
+    .today--hero {
+        padding: 8px;
+        /* Reduced from 20px */
+    }
+
+    .today-card {
+        padding: 16px;
+        min-height: auto;
+        border-radius: 16px;
+    }
+
+    .today-left .label {
+        font-size: 9px;
+        margin-bottom: 2px;
+        letter-spacing: 1px;
+    }
+
+    .today-left h1 {
+        font-size: 18px;
+        margin-top: 2px;
+        margin-bottom: 2px;
+        line-height: 1.2;
+    }
+
+    .today-left p {
+        font-size: 11px;
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    .execute {
+        padding: 8px 14px;
+        font-size: 12px;
+        border-radius: 10px;
+    }
 }
