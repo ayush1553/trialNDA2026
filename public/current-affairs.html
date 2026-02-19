@@ -13,9 +13,9 @@
         integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        /* Specific overrides for Current Affairs if needed */
+        /* Specific overrides for Current Affairs */
         .ca-container {
-            padding-top: 80px;
+            padding-top: 40px;
         }
 
         .month-header {
@@ -23,6 +23,66 @@
             margin: 20px 0;
             padding-left: 10px;
             border-left: 4px solid var(--accent);
+        }
+
+        /* Toggle Button Styles (Adapted from chapter-tests.css) */
+        .primary-toggle {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 32px;
+            padding: 4px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .toggle-btn.active {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .toggle-btn:not(.active):hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        /* View Pane Logic */
+        .view-pane {
+            display: none;
+        }
+
+        .view-pane.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
@@ -73,12 +133,35 @@
     <div class="container ca-container">
 
         <div class="perf-header">
-            <h2>Monthly Current Affairs</h2>
+            <h2>Current Affairs</h2>
         </div>
 
-        <!-- CONTENT LIST -->
-        <div class="test-list" id="ca-list-container">
-            <!-- Cards will be injected here -->
+        <!-- Top-Level Toggle -->
+        <div class="primary-toggle">
+            <button id="toggle-monthly" class="toggle-btn active" onclick="switchTab('Monthly')">Monthly CA</button>
+            <button id="toggle-daily" class="toggle-btn" onclick="switchTab('Daily')">Daily CA</button>
+            <button id="toggle-topic" class="toggle-btn" onclick="switchTab('Topic')">Topic Wise CA</button>
+        </div>
+
+        <!-- Monthly View Pane -->
+        <div id="pane-monthly" class="view-pane active">
+            <div class="test-list" id="monthly-list-container">
+                <!-- Monthly Cards Injected Here -->
+            </div>
+        </div>
+
+        <!-- Daily View Pane -->
+        <div id="pane-daily" class="view-pane">
+            <div class="test-list" id="daily-list-container">
+                <!-- Daily Cards Injected Here -->
+            </div>
+        </div>
+
+        <!-- Topic Wise View Pane -->
+        <div id="pane-topic" class="view-pane">
+            <div class="test-list" id="topic-list-container">
+                <!-- Topic Cards Injected Here -->
+            </div>
         </div>
 
     </div>
@@ -87,19 +170,53 @@
     <script src="db.js"></script>
     <script src="script.js"></script>
     <script>
-        // Mock data for Current Affairs
-        const currentAffairs = [
-            { id: 1, title: 'March 2026 - Monthly Capsule', date: 'March 2026', type: 'Capsule', readTime: '45 mins' },
-            { id: 2, title: 'February 2026 - Monthly Capsule', date: 'February 2026', type: 'Capsule', readTime: '40 mins' },
-            { id: 3, title: 'January 2026 - Monthly Capsule', date: 'January 2026', type: 'Capsule', readTime: '42 mins' },
-            { id: 4, title: 'December 2025 - Monthly Capsule', date: 'December 2025', type: 'Capsule', readTime: '38 mins' },
-            { id: 5, title: 'November 2025 - Monthly Capsule', date: 'November 2025', type: 'Capsule', readTime: '40 mins' },
-        ];
+        // Mock data
+        const caData = {
+            'Monthly': [
+                { id: 1, title: 'March 2026 - Monthly Capsule', date: 'March 2026', type: 'Capsule', readTime: '45 mins' },
+                { id: 2, title: 'February 2026 - Monthly Capsule', date: 'February 2026', type: 'Capsule', readTime: '40 mins' },
+                { id: 3, title: 'January 2026 - Monthly Capsule', date: 'January 2026', type: 'Capsule', readTime: '42 mins' },
+                { id: 4, title: 'December 2025 - Monthly Capsule', date: 'December 2025', type: 'Capsule', readTime: '38 mins' },
+                { id: 5, title: 'November 2025 - Monthly Capsule', date: 'November 2025', type: 'Capsule', readTime: '40 mins' },
+            ],
+            'Daily': [
+                { id: 101, title: '19th April 2026 - Daily Updates', date: '19 Apr 2026', type: 'Daily', readTime: '10 mins' },
+                { id: 102, title: '18th April 2026 - Daily Updates', date: '18 Apr 2026', type: 'Daily', readTime: '12 mins' },
+                { id: 103, title: '17th April 2026 - Daily Updates', date: '17 Apr 2026', type: 'Daily', readTime: '08 mins' },
+                { id: 104, title: '16th April 2026 - Daily Updates', date: '16 Apr 2026', type: 'Daily', readTime: '15 mins' },
+                { id: 105, title: '15th April 2026 - Daily Updates', date: '15 Apr 2026', type: 'Daily', readTime: '10 mins' },
+            ],
+            'Topic': [
+                { id: 201, title: 'Defence Exercises 2026', date: 'Updated: Apr 2026', type: 'Topic', readTime: '20 mins' },
+                { id: 202, title: 'International Summits (G20, G7)', date: 'Updated: Mar 2026', type: 'Topic', readTime: '25 mins' },
+                { id: 203, title: 'Awards and Honours 2025-26', date: 'Updated: Feb 2026', type: 'Topic', readTime: '30 mins' },
+                { id: 204, title: 'Science & Technology Developments', date: 'Updated: Jan 2026', type: 'Topic', readTime: '22 mins' },
+                { id: 205, title: 'Sports Current Affairs', date: 'Updated: Mar 2026', type: 'Topic', readTime: '15 mins' },
+            ]
+        };
 
-        function renderCards() {
-            const container = document.getElementById('ca-list-container');
+        let currentTab = 'Monthly';
 
-            container.innerHTML = currentAffairs.map(item => {
+        function switchTab(tab) {
+            currentTab = tab;
+
+            // Update Buttons
+            document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`toggle-${tab.toLowerCase()}`).classList.add('active');
+
+            // Update Panes
+            document.querySelectorAll('.view-pane').forEach(pane => pane.classList.remove('active'));
+            document.getElementById(`pane-${tab.toLowerCase()}`).classList.add('active');
+
+            // Render content if empty (optimization) or just re-render
+            renderCards(tab);
+        }
+
+        function renderCards(tab) {
+            const container = document.getElementById(`${tab.toLowerCase()}-list-container`);
+            const data = caData[tab];
+
+            container.innerHTML = data.map(item => {
                 return `
                     <div class="test-card">
                         <div class="card-main">
@@ -121,7 +238,9 @@
 
         // Initial render
         window.addEventListener('DOMContentLoaded', () => {
-            renderCards();
+            renderCards('Monthly');
+            renderCards('Daily');
+            renderCards('Topic');
         });
 
     </script>
