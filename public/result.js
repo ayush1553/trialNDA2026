@@ -92,6 +92,10 @@ async function loadQuestions() {
             }
             src = `data/${folder}/${slug}.js`;
 
+        } else if (type === 'CurrentAffairs') {
+            // Test ID format: ca_19_02_2026
+            const dateStr = testResult.test_id.replace(/^ca_/, ''); // 19_02_2026
+            src = `data/current_affairs/daily/${dateStr}.js`;
         } else {
             // PYQ
             src = `data/questions/${subj}_${yr}_${sess}.js`;
@@ -102,6 +106,22 @@ async function loadQuestions() {
         const script = document.createElement('script');
         script.src = src;
         script.onload = () => {
+            // Normalize Current Affairs Data if needed (Same logic as exam.html)
+            if (type === 'CurrentAffairs' && window.questionsData && !Array.isArray(window.questionsData)) {
+                if (window.questionsData.mcqs) {
+                    const rawMcqs = window.questionsData.mcqs;
+                    window.questionsData = rawMcqs.map((q, idx) => ({
+                        id: q.questionId || (idx + 1),
+                        text: q.question,
+                        options: q.options,
+                        correctAnswer: q.answer,
+                        solution: q.solution,
+                        marks: 4.0,
+                        negMarks: -1.33
+                    }));
+                }
+            }
+
             questionsData = window.questionsData || [];
             console.log("Questions Loaded. Count:", questionsData.length);
             resolve();
@@ -169,6 +189,14 @@ function reattemptTest() {
         // test_id is "mock_{slug}"
         const slug = testResult.test_id.replace('mock_', '');
         params.append('slug', slug);
+
+    } else if (testResult.test_type === 'CurrentAffairs') {
+        params.append('type', 'CurrentAffairs');
+        // test_id is "ca_{date}"
+        const date = testResult.test_id.replace('ca_', '');
+        params.append('date', date);
+        // We need 'file' param too. Reconstruct it.
+        params.append('file', `data/current_affairs/daily/${date}.js`);
 
     } else {
         // Standard PYQ
@@ -280,8 +308,8 @@ async function loadClassification() {
 
     let filename = "";
 
-    if (testResult.test_type === 'ChapterTest') {
-        return; // No topic analysis for chapter tests yet
+    if (testResult.test_type === 'ChapterTest' || testResult.test_type === 'CurrentAffairs') {
+        return; // No topic analysis for chapter tests or CA yet
     }
 
     // PYQ Structure: Subject_Year_Session
