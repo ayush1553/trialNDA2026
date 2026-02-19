@@ -33,6 +33,8 @@ const currentTestType = urlParams.get('type') || 'PYQ';
 let timeRemaining = (currentTestType === 'ChapterTest') ? 13 * 60 : 2 * 60 * 60 + 30 * 60; // Default 150 mins
 if (currentTestType === 'Mock') {
     timeRemaining = 150 * 60; // Always 150 mins for Full Length Mock
+} else if (currentTestType === 'CurrentAffairs') {
+    timeRemaining = 10 * 60; // 10 mins for Daily CA
 }
 
 function formatTime(seconds) {
@@ -135,6 +137,9 @@ function renderQuestion(index) {
             const mockSlug = urlParams.get('slug');
             const formattedMock = mockSlug ? mockSlug.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'Mock Test';
             examNameDisplay.textContent = `${formattedMock}`;
+        } else if (currentTestType === 'CurrentAffairs') {
+            const caDate = urlParams.get('date');
+            examNameDisplay.textContent = `Daily CA: ${caDate}`;
         } else {
             examNameDisplay.textContent = `NDA ${year}: ${subj} Live ...`;
         }
@@ -599,7 +604,8 @@ async function finishTest() {
     const attemptData = {
         user_id: session ? session.id : 'guest',
         test_id: currentTestType === 'ChapterTest' ? `ct_${urlParams.get('chapter')}` :
-            (currentTestType === 'Mock' ? `mock_${urlParams.get('slug')}` : `nda_${urlParams.get('year') || '2022'}_${urlParams.get('session') || '2'}`),
+            (currentTestType === 'Mock' ? `mock_${urlParams.get('slug')}` :
+                (currentTestType === 'CurrentAffairs' ? `ca_${urlParams.get('date').replace(/-/g, '_')}` : `nda_${urlParams.get('year') || '2022'}_${urlParams.get('session') || '2'}`)),
         test_type: currentTestType,
         subject: urlParams.get('subject') || 'Mathematics',
         year: currentTestType === 'Mock' ? '2026' : (urlParams.get('year') || '2022'),
@@ -615,7 +621,7 @@ async function finishTest() {
                 // MAT = 2.5, GAT = 4.0
                 const marksPerQ = (urlParams.get('subject') === 'Mathematics') ? 2.5 : 4.0;
                 return (questionsData.length * marksPerQ).toFixed(0);
-            } else if (urlParams.get('subject') === 'GAT' || (urlParams.get('subject') && urlParams.get('subject').includes('GAT'))) {
+            } else if (urlParams.get('subject') === 'GAT' || (urlParams.get('subject') && urlParams.get('subject').includes('GAT')) || currentTestType === 'CurrentAffairs') {
                 return (questionsData.length * 4.0).toFixed(0);
             } else {
                 return (questionsData.length * 2.5).toFixed(0);

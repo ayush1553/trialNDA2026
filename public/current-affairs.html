@@ -84,6 +84,97 @@
                 transform: translateY(0);
             }
         }
+
+        /* Daily CA Detail Styles */
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .ca-question-card {
+            background: rgba(255, 255, 255, 0.05);
+            /* Glass-like */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .ca-q-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .q-num {
+            font-weight: bold;
+            color: var(--accent);
+            /* Assuming variable exists, else #3b82f6 */
+        }
+
+        .ca-q-text {
+            font-size: 1.1em;
+            font-weight: 500;
+            color: #fff;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .ca-option {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ca-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .opt-key {
+            background: rgba(255, 255, 255, 0.1);
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .ca-solution {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid #3b82f6;
+            border-radius: 4px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
     </style>
 </head>
 
@@ -164,6 +255,8 @@
             </div>
         </div>
 
+        <!-- Detailed Questions View Removed - Now using Instructions Page -->
+
     </div>
 
     <script src="auth.js"></script>
@@ -180,11 +273,8 @@
                 { id: 5, title: 'November 2025 - Monthly Capsule', date: 'November 2025', type: 'Capsule', readTime: '40 mins' },
             ],
             'Daily': [
-                { id: 101, title: '19th April 2026 - Daily Updates', date: '19 Apr 2026', type: 'Daily', readTime: '10 mins' },
-                { id: 102, title: '18th April 2026 - Daily Updates', date: '18 Apr 2026', type: 'Daily', readTime: '12 mins' },
-                { id: 103, title: '17th April 2026 - Daily Updates', date: '17 Apr 2026', type: 'Daily', readTime: '08 mins' },
-                { id: 104, title: '16th April 2026 - Daily Updates', date: '16 Apr 2026', type: 'Daily', readTime: '15 mins' },
-                { id: 105, title: '15th April 2026 - Daily Updates', date: '15 Apr 2026', type: 'Daily', readTime: '10 mins' },
+                { id: 101, title: '19th February 2026 - Daily Updates', date: '19 Feb 2026', type: 'Daily', readTime: '10 mins', file: 'data/current_affairs/daily/19_02_2026.js' },
+                { id: 102, title: '18th February 2026 - Daily Updates', date: '18 Feb 2026', type: 'Daily', readTime: '12 mins', file: null },
             ],
             'Topic': [
                 { id: 201, title: 'Defence Exercises 2026', date: 'Updated: Apr 2026', type: 'Topic', readTime: '20 mins' },
@@ -217,15 +307,23 @@
             const data = caData[tab];
 
             container.innerHTML = data.map(item => {
+                let checkClickAction = '';
+                if (tab === 'Daily' && item.file) {
+                    // Redirect to Instructions Page for GAT-style test
+                    checkClickAction = `onclick="window.location.href='instructions.html?type=CurrentAffairs&date=${item.date}&file=${item.file}'"`;
+                } else {
+                    checkClickAction = `onclick="alert('Content coming soon!')"`;
+                }
+
                 return `
-                    <div class="test-card">
+                    <div class="test-card" ${checkClickAction} style="cursor: pointer;">
                         <div class="card-main">
                             <div class="title-row">
                                 <div class="test-title">${item.title}</div>
-                                <div class="start-link" onclick="alert('PDF Viewer Coming Soon!')">Read Now</div>
+                                <div class="start-link">Start Test <i class="fa-solid fa-arrow-right"></i></div>
                             </div>
                             <div class="meta-row">
-                                ${item.type} · ${item.readTime} Read
+                                ${item.type} · ${item.readTime} · 40 Marks
                             </div>
                         </div>
                         <div class="card-footer">

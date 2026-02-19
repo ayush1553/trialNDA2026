@@ -197,6 +197,10 @@
                 targetUrl = `exam.html?type=ChapterTest&subject=${encodeURIComponent(subject)}&chapter=${chapterSlug}`;
             } else if (type === 'Mock') {
                 targetUrl = `exam.html?type=Mock&subject=${encodeURIComponent(subject)}&slug=${mockSlug}`;
+            } else if (type === 'CurrentAffairs') {
+                const date = urlParams.get('date');
+                const file = urlParams.get('file');
+                targetUrl = `exam.html?type=CurrentAffairs&date=${date}&file=${file}`;
             }
             window.location.href = targetUrl;
         }

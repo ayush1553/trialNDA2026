@@ -237,6 +237,7 @@
         const sess = params.get('session') || '2';
         const chapter = params.get('chapter');
         const mockSlug = params.get('slug');
+        const caFile = params.get('file');
 
         const script = document.createElement('script');
 
@@ -251,12 +252,33 @@
         } else if (type === 'Mock') {
             const folder = subj === 'Mathematics' ? 'mock_test_mat' : 'mock_test_gat';
             script.src = `data/${folder}/${mockSlug}.js`;
+        } else if (type === 'CurrentAffairs') {
+            script.src = caFile;
         } else {
             script.src = `data/questions/${subj}_${yr}_${sess}.js`;
         }
 
         script.onload = () => {
-            console.log("Questions data loaded:", type, subj, chapter || `${yr}_${sess}`);
+            console.log("Questions data loaded:", type);
+
+            // Normalize Current Affairs Data if needed
+            if (type === 'CurrentAffairs' && window.questionsData && !Array.isArray(window.questionsData)) {
+                // It's in format {date: "...", mcqs: [ ... ] }
+                if (window.questionsData.mcqs) {
+                    const rawMcqs = window.questionsData.mcqs;
+                    // Map to Exam Engine Format
+                    window.questionsData = rawMcqs.map((q, idx) => ({
+                        id: q.questionId || (idx + 1),
+                        text: q.question, // Map 'question' to 'text'
+                        options: q.options,
+                        correctAnswer: q.answer,
+                        solution: q.solution,
+                        marks: 4.0,     // Default GAT marks
+                        negMarks: -1.33 // Default GAT neg marks
+                    }));
+                }
+            }
+
             // Load exam.js only after data is ready
             const examScript = document.createElement('script');
             examScript.src = "exam.js";
@@ -265,10 +287,11 @@
         script.onerror = () => {
             console.error("Failed to load script:", script.src);
             alert(`Error: Questions for this set are not available yet.\nFailed to load: ${script.src}`);
-            window.location.href = type === 'ChapterTest' ? 'chapter_tests.html' : 'pyqs.html';
+            window.location.href = 'index.html';
         };
         document.head.appendChild(script);
     </script>
+
 
 </body>
 
