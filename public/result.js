@@ -417,11 +417,12 @@ function filterSolutions(type) {
 let topicStats = []; // Stores processed stats
 
 async function loadClassification() {
-    // Determine file based on test info
-    // Logic: Look for data/questions/questions_classification/{Subject}_{Year}_{Session}_classification.js
-    // MOCK MODE: If mock, we might need a specific map or default to GAT if it's GAT.
-
-    let filename = "";
+    // Check if already embedded in questions file
+    if (window.topicClassification) {
+        console.log("Found embedded classification data.");
+        processTopicAnalytics();
+        return;
+    }
 
     if (testResult.test_type === 'ChapterTest' || testResult.test_type === 'CurrentAffairs') {
         return; // No topic analysis for chapter tests or CA yet
@@ -433,12 +434,8 @@ async function loadClassification() {
     const year = testResult.year || "2022";
     const session = testResult.session || "2";
 
-    // Hack for the specific user request: "GAT 2020 2"
-    // User file: GAT_2020_2_classification.js
-    // We try to construct this.
-
     const baseName = `${subject}_${year}_${session}`;
-    filename = `data/questions/questions_classification/${baseName}_classification.js`;
+    const filename = `data/questions/questions_classification/${baseName}_classification.js`;
 
     // Dynamic Load
     return new Promise((resolve) => {
@@ -474,9 +471,13 @@ async function loadClassification() {
 }
 
 function processTopicAnalytics() {
-    if (!window.topicClassification || !window.topicClassification[0]) return;
+    if (!window.topicClassification) return;
 
-    const mapping = window.topicClassification[0]; // The object inside array
+    // Handle both old array format [ {Subj: {Topic: []}} ] and new object format {Subj: {Topic: []}}
+    let mapping = window.topicClassification;
+    if (Array.isArray(window.topicClassification)) {
+        mapping = window.topicClassification[0];
+    }
     const detailedRes = testResult.detailedResults || [];
 
     // Helper Map: Question ID -> Result Status

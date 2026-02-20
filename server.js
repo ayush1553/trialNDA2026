@@ -39,6 +39,17 @@ const checkConfig = (req, res, next) => {
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
+
+// Global Debug Logger
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    next();
+});
+
+// Test Endpoint
+app.get('/api/hello', (req, res) => {
+    res.json({ message: 'API is working' });
+});
 // Static files handled by Vercel in production, only needed for local dev
 if (require.main === module) {
     // Fallback for SPA or root access in local dev
@@ -274,7 +285,62 @@ app.get('/api/admin/user/:userId/attempts', isAdmin, async (req, res) => {
     res.json(data.map(mapAttempt));
 });
 
+// --- TEST MANAGEMENT API (ADMIN ONLY) ---
+
+// 9. Get All Tests for Management
+app.get('/api/admin/tests', isAdmin, async (req, res) => {
+    console.log('GET /api/admin/tests - Admin Email:', req.headers['x-admin-email']);
+    const { data, error } = await supabase
+        .from('test_registry')
+        .select('*')
+        .order('category', { ascending: true })
+        .order('year', { ascending: false })
+        .order('created_at', { ascending: true });
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+});
+
+// 10. Update Test Status
+app.patch('/api/admin/tests/:testId/status', isAdmin, async (req, res) => {
+    const { testId } = req.params;
+    const { status } = req.body;
+
+    if (!['active', 'coming_soon'].includes(status)) {
+        return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    const { data, error } = await supabase
+        .from('test_registry')
+        .update({ status })
+        .eq('test_id', testId)
+        .select()
+        .single();
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+});
+
+// 11. Public: Get All Tests (No Auth needed for read)
+app.get('/api/tests', async (req, res) => {
+    const { data, error } = await supabase
+        .from('test_registry')
+        .select('*')
+        .order('category', { ascending: true });
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+});
+
 // Export the app for Vercel
+app.get('/api', (req, res) => res.json({ status: 'NDA Prep API Online' }));
+
+// 404 Catch-all for /api
+app.use('/api/*', (req, res) => {
+    console.log(`404 NOT FOUND: ${req.method} ${req.url}`);
+    res.status(404).json({ error: `Path ${req.url} not found on this server.` });
+});
+
 module.exports = app;
 
 if (require.main === module) {

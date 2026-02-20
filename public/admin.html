@@ -24,6 +24,26 @@
             min-height: 100vh;
         }
 
+        /* Visibility Fixes for Data on White Backgrounds */
+        .card h3,
+        .card .value,
+        th,
+        td,
+        #admin-info,
+        #admin-email {
+            color: #1e293b !important;
+            /* Force dark text for visibility */
+        }
+
+        .card h3 {
+            opacity: 0.7;
+        }
+
+        header h1 {
+            color: white !important;
+            /* Keep dashboard title white against dark bg */
+        }
+
         /* Sidebar */
         .sidebar {
             width: 250px;
@@ -54,6 +74,138 @@
 
         .nav-item.active {
             background: var(--admin-accent);
+        }
+
+        /* Test Portal Specific */
+        .portal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .portal-column {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .portal-column h2 {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: var(--admin-primary);
+            border-bottom: 2px solid var(--admin-bg);
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .test-item {
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #e2e8f0;
+        }
+
+        .test-item.active-test {
+            border-left-color: var(--admin-accent);
+        }
+
+        .test-item.coming-test {
+            border-left-color: #fca5a5;
+        }
+
+        .test-info {
+            flex-grow: 1;
+            margin-right: 15px;
+        }
+
+        .test-list-admin {
+            flex-grow: 1;
+            overflow-y: auto;
+            min-height: 50px;
+        }
+
+        .test-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1e293b !important;
+        }
+
+        .test-sub {
+            font-size: 0.75rem;
+            color: #64748b !important;
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--admin-accent);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(22px);
+        }
+
+        .status-labels {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 0.8rem;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
         }
 
         /* Main Content */
@@ -226,49 +378,97 @@
 <body>
     <div class="sidebar">
         <h2>Exam Authority</h2>
-        <div class="nav-item active">Users Monitor</div>
+        <div class="nav-item active" onclick="switchSection('users', this)">Users Monitor</div>
+        <div class="nav-item" onclick="switchSection('portal', this)">Tests Portal</div>
         <div class="nav-item" onclick="window.location.href='index.html'">Main Site</div>
     </div>
 
     <div class="main-content">
-        <header>
-            <h1>Admin Dashboard</h1>
-            <div id="admin-info">Admin: <span id="admin-email"></span></div>
-        </header>
+        <!-- USERS SECTION -->
+        <div id="section-users" class="content-section active">
+            <header>
+                <h1>Admin Dashboard</h1>
+                <div id="admin-info">Admin: <span id="admin-email"></span></div>
+            </header>
 
-        <div class="stat-cards">
-            <div class="card">
-                <h3>Total Registered Users</h3>
-                <div class="value" id="total-users-count">0</div>
+            <div class="stat-cards">
+                <div class="card">
+                    <h3>Total Registered Users</h3>
+                    <div class="value" id="total-users-count">0</div>
+                </div>
+                <div class="card">
+                    <h3>Active Today</h3>
+                    <div class="value" id="active-today">0</div>
+                </div>
+                <div class="card">
+                    <h3>Total Attempts</h3>
+                    <div class="value" id="total-attempts-all">0</div>
+                </div>
             </div>
-            <div class="card">
-                <h3>Active Today</h3>
-                <div class="value" id="active-today">0</div>
-            </div>
-            <div class="card">
-                <h3>Total Attempts</h3>
-                <div class="value" id="total-attempts-all">0</div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Joined</th>
+                            <th>Total Tests</th>
+                            <th>PYQs / Mocks</th>
+                            <th>Avg Score (%)</th>
+                            <th>Avg Accuracy</th>
+                            <th>Last Attempt</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <!-- Data will be injected here -->
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Email</th>
-                        <th>Joined</th>
-                        <th>Total Tests</th>
-                        <th>PYQs / Mocks</th>
-                        <th>Avg Score (%)</th>
-                        <th>Avg Accuracy</th>
-                        <th>Last Attempt</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="users-table-body">
-                    <!-- Data will be injected here -->
-                </tbody>
-            </table>
+        <!-- TESTS PORTAL SECTION -->
+        <div id="section-portal" class="content-section">
+            <header>
+                <h1>Tests Portal Management</h1>
+                <div class="status-labels">
+                    <span style="display:flex; align-items:center; gap:5px;">
+                        <div style="width:12px; height:12px; border-radius:3px; background:var(--admin-accent);"></div>
+                        Start (Active)
+                    </span>
+                    <span style="display:flex; align-items:center; gap:5px;">
+                        <div style="width:12px; height:12px; border-radius:3px; background:#cbd5e1;"></div> Coming Soon
+                    </span>
+                </div>
+            </header>
+
+            <div class="portal-grid">
+                <!-- Columns for Mock, PYQ, Chapter, CA -->
+                <div class="portal-column">
+                    <h2>Mock Tests <span id="mock-count-admin" class="test-sub"></span></h2>
+                    <div id="admin-mock-list" class="test-list-admin">
+                        <p class="test-sub" style="text-align:center; padding:20px;">Loading mocks...</p>
+                    </div>
+                </div>
+                <div class="portal-column">
+                    <h2>Previous Years <span id="pyq-count-admin" class="test-sub"></span></h2>
+                    <div id="admin-pyq-list" class="test-list-admin">
+                        <p class="test-sub" style="text-align:center; padding:20px;">Loading papers...</p>
+                    </div>
+                </div>
+                <div class="portal-column">
+                    <h2>Chapter Tests <span id="chapter-count-admin" class="test-sub"></span></h2>
+                    <div id="admin-chapter-list" class="test-list-admin">
+                        <p class="test-sub" style="text-align:center; padding:20px;">Loading chapters...</p>
+                    </div>
+                </div>
+                <div class="portal-column">
+                    <h2>Current Affairs <span id="ca-count-admin" class="test-sub"></span></h2>
+                    <div id="admin-ca-list" class="test-list-admin">
+                        <p class="test-sub" style="text-align:center; padding:20px;">Loading updates...</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

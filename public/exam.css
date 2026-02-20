@@ -255,6 +255,7 @@ html {
     margin-bottom: 12px;
     font-weight: 400;
     display: block;
+    white-space: pre-wrap;
 }
 
 /* Directions Support */
@@ -278,6 +279,7 @@ html {
     color: #94A3B8;
     line-height: 1.5;
     font-weight: 400;
+    white-space: pre-wrap;
 }
 
 .question-text {
@@ -288,6 +290,7 @@ html {
     font-weight: 500;
     margin-bottom: 20px;
     margin-top: 4px;
+    white-space: pre-wrap;
 }
 
 .data-block {
@@ -425,6 +428,7 @@ html {
     color: #F1F5F9;
     font-weight: 500;
     line-height: 1.5;
+    white-space: pre-wrap;
 }
 
 /* Selection Indicator - Glow Border already handles it, removing side bar */
@@ -530,7 +534,8 @@ html {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    z-index: 1005;
+    z-index: 2020;
+    /* Raised above action-bar (2005) */
     transition: transform 0.3s ease;
     color: #E2E8F0;
 }
@@ -770,7 +775,8 @@ html {
         right: 0;
         bottom: 0;
         background: rgba(0, 0, 0, 0.5);
-        z-index: 1004;
+        z-index: 2010;
+        /* Raised above action-bar */
     }
 
     .palette-backdrop.active {
@@ -1211,4 +1217,44 @@ html {
 .p-btn.current {
     border: 2px solid #3B82F6;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+/* Question Image Container (New) */
+.question-image-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.q-image-wrapper {
+    max-width: 95%;
+    /* Increased from 100% to allow some breathing room but wider */
+    width: 600px;
+    /* Base width set larger */
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    background: rgba(30, 41, 59, 0.4);
+    /* Darker, consistent with options */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    backdrop-filter: blur(5px);
+}
+
+.q-image-wrapper img {
+    width: 100%;
+    /* Take full width of wrapper */
+    height: auto;
+    border-radius: 8px;
+    cursor: zoom-in;
+    transition: transform 0.2s ease;
+    object-fit: contain;
+    max-height: 800px;
+    /* Doubled from 400px */
+}
+
+.q-image-wrapper img:hover {
+    transform: scale(1.02);
 }

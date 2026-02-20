@@ -283,8 +283,22 @@
             updateView();
         }
 
+        let globalStatusMap = {};
+
         // 4. Update Cards Based on Selection
-        function updateView() {
+        async function updateView() {
+            try {
+                const response = await fetch('/api/tests');
+                const tests = await response.json();
+
+                globalStatusMap = {};
+                tests.filter(t => t.category === 'Chapter').forEach(t => {
+                    globalStatusMap[t.slug] = t.status;
+                });
+            } catch (error) {
+                console.error('Error fetching test status:', error);
+            }
+
             if (currentMainTab === 'MAT') {
                 renderMathCards();
             } else {
@@ -301,7 +315,8 @@
 
                 // List of IDs that have data files in /data/chapter_test_mat/
                 const availableIds = [1, 2, 3, 5, 6];
-                const isAvailable = availableIds.includes(item.id);
+                const dbStatus = globalStatusMap[item.slug];
+                const isAvailable = dbStatus ? (dbStatus === 'active') : availableIds.includes(item.id);
 
                 return `
                     <div class="ct-card" ${!isAvailable ? 'style="opacity: 0.8;"' : ''}>
@@ -328,7 +343,8 @@
             const container = document.getElementById('gat-cards-container');
             if (currentGatSubject === 'English') {
                 container.innerHTML = englishChapters.map(chapter => {
-                    const isAvailable = true; // All 4 chapters are uploaded
+                    const dbStatus = globalStatusMap[chapter.slug];
+                    const isAvailable = dbStatus ? (dbStatus === 'active') : true; // All 4 chapters are uploaded
                     return `
                     <div class="ct-card" ${!isAvailable ? 'style="opacity: 0.8;"' : ''}>
                         <div class="ct-card-main">
@@ -350,7 +366,8 @@
                 }).join('');
             } else if (currentGatSubject === 'Physics') {
                 container.innerHTML = physicsChapters.map(chapter => {
-                    const isAvailable = chapter.id <= 10; // Chapters 1-10 are uploaded
+                    const dbStatus = globalStatusMap[chapter.slug];
+                    const isAvailable = dbStatus ? (dbStatus === 'active') : chapter.id <= 10; // Chapters 1-10 are uploaded
                     return `
                     <div class="ct-card" ${!isAvailable ? 'style="opacity: 0.8;"' : ''}>
                         <div class="ct-card-main">
@@ -372,7 +389,8 @@
                 }).join('');
             } else if (currentGatSubject === 'Chemistry') {
                 container.innerHTML = chemistryChapters.map(chapter => {
-                    const isAvailable = chapter.id !== 9; // All except CT 9 are uploaded
+                    const dbStatus = globalStatusMap[chapter.slug];
+                    const isAvailable = dbStatus ? (dbStatus === 'active') : chapter.id !== 9; // All except CT 9 are uploaded
                     return `
                     <div class="ct-card" ${!isAvailable ? 'style="opacity: 0.8;"' : ''}>
                         <div class="ct-card-main">

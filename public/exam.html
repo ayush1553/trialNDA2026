@@ -71,6 +71,9 @@
                 <p>Loading Question...</p>
             </div>
 
+            <!-- Question Image Container (Moved) -->
+            <div id="question-image-container" class="question-image-container"></div>
+
             <div class="options-list">
                 <!-- Options rendered via JS -->
             </div>
@@ -282,6 +285,34 @@
                         marks: q.marks || 4.0,     // Default GAT marks
                         negMarks: q.negMarks || -1.33 // Default GAT neg marks
                     }));
+                }
+            }
+
+            // Merge solutions if available
+            if (window.solutionsData && window.questionsData) {
+                window.questionsData.forEach(q => {
+                    const solObj = window.solutionsData.find(s => s.id === q.id);
+                    if (solObj) {
+                        q.solution = solObj.solution;
+                    }
+                });
+            }
+
+            // Merge topics if available
+            if (window.topicClassification && window.questionsData) {
+                // Find the first subject key (e.g., 'Mathematics' or 'GAT')
+                const subjectKeys = Object.keys(window.topicClassification);
+                if (subjectKeys.length > 0) {
+                    const classification = window.topicClassification[subjectKeys[0]];
+                    // Iterate through each topic
+                    for (const [topicName, questionIds] of Object.entries(classification)) {
+                        questionIds.forEach(id => {
+                            const q = window.questionsData.find(q => q.id === id);
+                            if (q) {
+                                q.topic = topicName;
+                            }
+                        });
+                    }
                 }
             }
 

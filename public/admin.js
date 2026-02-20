@@ -8,12 +8,14 @@ const SESSION_KEY = 'nda_platform_session';
 const adminUser = JSON.parse(localStorage.getItem(SESSION_KEY));
 
 function checkAdminAccess() {
+    console.log('Checking admin access...', adminUser);
     if (!adminUser || adminUser.role !== 'admin') {
         alert('Access Denied: Admin privileges required.');
         window.location.href = 'login.html';
         return;
     }
-    document.getElementById('admin-email').textContent = adminUser.email;
+    const emailElem = document.getElementById('admin-email');
+    if (emailElem) emailElem.textContent = adminUser.email || 'Admin';
 }
 
 async function loadUsers() {
@@ -141,3 +143,157 @@ window.onclick = (event) => {
     const modal = document.getElementById('user-detail-modal');
     if (event.target == modal) closeModal();
 };
+
+function switchSection(sectionId, element) {
+    // Update Sidebar
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    element.classList.add('active');
+
+    // Update Content
+    document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+    document.getElementById(`section-${sectionId}`).classList.add('active');
+
+    if (sectionId === 'portal') {
+        loadTestsPortal();
+    }
+}
+
+async function loadTestsPortal() {
+    try {
+        console.log('Fetching tests for portal... Email:', adminUser ? adminUser.email : 'null');
+        const response = await fetch('/api/admin/tests', {
+            headers: {
+                'x-admin-email': adminUser ? adminUser.email : ''
+            }
+        });
+
+        if (!response.ok) {
+            const errBody = await response.json().catch(() => ({}));
+            console.error('API Error Response:', response.status, errBody);
+            return;
+        }
+
+        const tests = await response.json();
+        console.log('Received tests for portal:', tests);
+
+        if (!Array.isArray(tests)) {
+            console.error('Expected array of tests, got:', tests);
+            return;
+        }
+
+        renderPortal(tests);
+    } catch (error) {
+        console.error('Error loading tests portal:', error);
+    }
+}
+
+function renderPortal(tests) {
+    const containers = {
+        'Mock': document.getElementById('admin-mock-list'),
+        'PYQ': document.getElementById('admin-pyq-list'),
+        'Chapter': document.getElementById('admin-chapter-list'),
+        'CA': document.getElementById('admin-ca-list')
+    };
+
+    // Define Sorting Priorities
+    const subjectPriority = {
+        'Mathematics': 1, 'MAT': 1,
+        'Chemistry': 2,
+        'Physics': 3,
+        'History': 4,
+        'Polity': 5,
+        'Economy': 6,
+        'Geography': 7,
+        'English': 8, 'GAT': 8,
+        'Art & Culture': 9,
+        'General Science': 10,
+        'Static GK': 11
+    };
+
+    // Sort tests helper
+    const sortedTests = [...tests].sort((a, b) => {
+        // First by category priority (if they were mixed, but we group them anyway)
+        // Within the same category:
+
+        // 1. Sort by sub_category/subject priority
+        const pA = subjectPriority[a.sub_category] || 99;
+        const pB = subjectPriority[b.sub_category] || 99;
+        if (pA !== pB) return pA - pB;
+
+        // 2. Sort by Year (Descending)
+        if (a.year !== b.year) return (parseInt(b.year) || 0) - (parseInt(a.year) || 0);
+
+        // 3. Sort by Title/ID
+        return a.title.localeCompare(b.title);
+    });
+
+    // Clear lists
+    Object.values(containers).forEach(c => {
+        if (c) c.innerHTML = '';
+    });
+
+    const counts = { 'Mock': 0, 'PYQ': 0, 'Chapter': 0, 'CA': 0 };
+
+    sortedTests.forEach(test => {
+        const container = containers[test.category];
+        if (!container) return;
+
+        counts[test.category]++;
+        const isActive = test.status === 'active';
+
+        const item = document.createElement('div');
+        item.className = `test-item ${isActive ? 'active-test' : 'coming-test'}`;
+        item.innerHTML = `
+            <div class="test-info">
+                <div class="test-title">${test.title}</div>
+                <div class="test-sub">${test.sub_category || ''} ${test.year ? '| ' + test.year : ''}</div>
+            </div>
+            <label class="switch">
+                <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleTestStatus('${test.test_id}', this)">
+                <span class="slider"></span>
+            </label>
+        `;
+        container.appendChild(item);
+    });
+
+    // Check for empty columns and show fallback
+    Object.keys(containers).forEach(cat => {
+        const container = containers[cat];
+        if (container && counts[cat] === 0) {
+            container.innerHTML = `<p class="test-sub" style="text-align:center; padding:20px;">No tests found for ${cat}.</p>`;
+        }
+    });
+
+    // Update counts
+    if (document.getElementById('mock-count-admin')) document.getElementById('mock-count-admin').textContent = `(${counts['Mock']})`;
+    if (document.getElementById('pyq-count-admin')) document.getElementById('pyq-count-admin').textContent = `(${counts['PYQ']})`;
+    if (document.getElementById('chapter-count-admin')) document.getElementById('chapter-count-admin').textContent = `(${counts['Chapter']})`;
+    if (document.getElementById('ca-count-admin')) document.getElementById('ca-count-admin').textContent = `(${counts['CA']})`;
+}
+
+async function toggleTestStatus(testId, checkbox) {
+    const newStatus = checkbox.checked ? 'active' : 'coming_soon';
+
+    try {
+        const response = await fetch(`/api/admin/tests/${testId}/status`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-admin-email': adminUser.email
+            },
+            body: JSON.stringify({ status: newStatus })
+        });
+
+        if (!response.ok) {
+            alert('Failed to update status');
+            checkbox.checked = !checkbox.checked; // Revert UI
+        } else {
+            // Update item styling
+            const item = checkbox.closest('.test-item');
+            item.className = `test-item ${checkbox.checked ? 'active-test' : 'coming-test'}`;
+        }
+    } catch (error) {
+        console.error('Error toggling status:', error);
+        checkbox.checked = !checkbox.checked;
+    }
+}

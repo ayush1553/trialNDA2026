@@ -249,6 +249,24 @@ function renderQuestion(index) {
         else btn.classList.remove('current');
     });
 
+    // 3. Handle Images (Moved to bottom)
+    const imgContainer = document.getElementById('question-image-container');
+    if (imgContainer) {
+        imgContainer.innerHTML = ''; // Clear previous
+        if (q.image) {
+            const imgWrapper = document.createElement('div');
+            imgWrapper.className = 'q-image-wrapper';
+
+            const img = document.createElement('img');
+            img.src = q.image;
+            img.alt = "Question Image";
+            img.onclick = () => openImageModal(img.src, "Question Illustration");
+
+            imgWrapper.appendChild(img);
+            imgContainer.appendChild(imgWrapper);
+        }
+    }
+
     // Valid Solution Display in Review Mode
     if (isReviewMode && q.solution) {
         const solDiv = document.createElement('div');
@@ -256,9 +274,18 @@ function renderQuestion(index) {
         solDiv.innerHTML = `
             <div style="margin-top: 20px; padding: 15px; background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; border-radius: 4px; color: #fff;">
                 <h4 style="margin: 0 0 10px 0; color: #60a5fa;"><i class="fa-solid fa-lightbulb"></i> Solution</h4>
-                <p style="margin: 0; line-height: 1.6; font-size: 0.95rem;">${q.solution}</p>
+                <p style="margin: 0; line-height: 1.6; font-size: 0.95rem; white-space: pre-wrap;">${q.solution}</p>
             </div>
         `;
+        // Append solution AFTER everything (options + image) 
+        // Logic: if images are separate, solution should ideally be at very bottom. 
+        // For now, appending to optionsContainer is fine as that is above image container in DOM? 
+        // Wait, DOM order is: content -> options -> image. 
+        // So solution appended to optionsContainer will be above image. 
+        // User didn't specify solution position, but typically solution is at bottom.
+        // Let's append solution to optionsContainer as before, unless user requested otherwise.
+        // User request: "Level 2: Image must appear below the question text and options."
+        // Solution is review mode only. Let's keep it in optionsContainer.
         optionsContainer.appendChild(solDiv);
     }
 }
@@ -389,14 +416,7 @@ function renderComplexQuestion(q, container) {
         container.appendChild(textEl);
     }
 
-    // 3. Handle Images
-    if (q.image) {
-        const img = document.createElement('img');
-        img.src = q.image;
-        img.alt = "Question Image";
-        img.onclick = () => openImageModal(img.src, "Question Illustration");
-        container.appendChild(img);
-    }
+    // 3. Handle Images - REMOVED (Moved to renderQuestion)
 }
 
 // Image Modal Handler

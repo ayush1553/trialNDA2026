@@ -215,50 +215,53 @@
         };
 
         // AVAILABILITY LOGIC
-        function checkAvailability() {
-            const cards = document.querySelectorAll('.year-card');
-            cards.forEach(card => {
-                const year = card.dataset.year;
-                const session = card.dataset.session;
+        async function checkAvailability() {
+            try {
+                const response = await fetch('/api/tests');
+                const tests = await response.json();
 
-                // Add exam details to card
-                const meta = examMetadata[subject];
-                const sessionInfo = meta.sessions[session];
-                const displaySubject = subject === 'Mathematics' ? 'Mathematics' : 'GAT';
-                const examFullTitle = `NDA-${sessionInfo.roman} ${year} (${displaySubject}) Official Paper (Held On: ${sessionInfo.date}, ${year})`;
+                // Index tests for quick lookup
+                const statusMap = {};
+                tests.filter(t => t.category === 'PYQ').forEach(t => {
+                    statusMap[`${t.sub_category}_${t.year}_${t.session}`] = t.status;
+                });
 
-                const isAvailable = (subject === 'Mathematics' && year === '2022' && session === '2') ||
-                    (subject === 'Mathematics' && year === '2025' && session === '2') ||
-                    (subject === 'Mathematics' && year === '2024' && session === '2') ||
-                    (subject === 'Mathematics' && year === '2023' && session === '2') ||
-                    (subject === 'Mathematics' && year === '2024' && session === '1') ||
-                    (subject === 'Mathematics' && year === '2022' && session === '1') ||
-                    (subject === 'Mathematics' && year === '2023' && session === '1') ||
-                    (subject === 'GAT' && year === '2020' && session === '2') ||
-                    (subject === 'GAT' && year === '2021' && session === '1') ||
-                    (subject === 'GAT' && year === '2022' && session === '1');
+                const cards = document.querySelectorAll('.year-card');
+                cards.forEach(card => {
+                    const year = card.dataset.year;
+                    const session = card.dataset.session;
 
-                let ctaHtml = '';
-                if (isAvailable) {
-                    // Reverting to "Start Test" as per user request
-                    ctaHtml = `<a href="javascript:void(0)" class="btn-cta" onclick="startTest('${year}', '${session}')">Start Test</a>`;
-                } else {
-                    ctaHtml = `<span class="btn-coming-soon">Coming Soon</span>`;
-                }
+                    const meta = examMetadata[subject];
+                    const sessionInfo = meta.sessions[session];
+                    const displaySubject = subject === 'Mathematics' ? 'Mathematics' : 'GAT';
+                    const examFullTitle = `NDA-${sessionInfo.roman} ${year} (${displaySubject}) Official Paper (Held On: ${sessionInfo.date}, ${year})`;
 
-                card.innerHTML = `
-                    <div class="card-main">
-                        <h3 class="exam-title">${examFullTitle}</h3>
-                        <div class="card-meta-row">
-                            <span class="exam-stats">${meta.stats}</span>
-                            ${ctaHtml}
+                    const statusKey = `${subject}_${year}_${session}`;
+                    const isAvailable = statusMap[statusKey] === 'active';
+
+                    let ctaHtml = '';
+                    if (isAvailable) {
+                        ctaHtml = `<a href="javascript:void(0)" class="btn-cta" onclick="startTest('${year}', '${session}')">Start Test</a>`;
+                    } else {
+                        ctaHtml = `<span class="btn-coming-soon">Coming Soon</span>`;
+                    }
+
+                    card.innerHTML = `
+                        <div class="card-main">
+                            <h3 class="exam-title">${examFullTitle}</h3>
+                            <div class="card-meta-row">
+                                <span class="exam-stats">${meta.stats}</span>
+                                ${ctaHtml}
+                            </div>
                         </div>
-                    </div>
-                    <div class="card-footer">
-                        <span class="language-label">English, Hindi</span>
-                    </div>
-                `;
-            });
+                        <div class="card-footer">
+                            <span class="language-label">English, Hindi</span>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                console.error('Error fetching test status:', error);
+            }
         }
 
         function startTest(year, session) {
