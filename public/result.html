@@ -7,10 +7,45 @@
     <title>Analysis - NDA Prep</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="result.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="feedback.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 
 <body class="analysis-theme">
+
+    <!-- FEEDBACK MODAL -->
+    <div class="feedback-modal-overlay">
+        <div class="feedback-glass-container">
+            <div class="feedback-close-btn">
+                <i class="fa-solid fa-xmark"></i>
+            </div>
+            <h2>Give feedback</h2>
+            <p>How was your Test?</p>
+            <div class="feedback-rating">
+                <i class="fa-regular fa-face-angry" title="Angry"></i>
+                <i class="fa-regular fa-face-frown" title="Frown"></i>
+                <i class="fa-regular fa-face-meh" title="Meh"></i>
+                <i class="fa-regular fa-face-smile active" title="Smile"></i>
+                <i class="fa-regular fa-face-laugh" title="Laugh"></i>
+            </div>
+            <label>Do you have any thoughts you'd like to share?</label>
+            <textarea placeholder="Tell us how we can improve..."></textarea>
+            <label>May we follow you up on your feedback?</label>
+            <div class="feedback-radio-group">
+                <label><input type="radio" name="feedback-follow" value="yes" checked> Yes</label>
+                <label><input type="radio" name="feedback-follow" value="no"> No</label>
+            </div>
+            <div class="feedback-button-group">
+                <button class="feedback-btn-primary">Send</button>
+                <button class="feedback-btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <!-- TOP BAR -->
     <header class="topbar">
@@ -237,6 +272,7 @@
     <script src="auth.js"></script>
     <script src="db.js"></script>
     <script src="result.js"></script>
+    <script src="feedback.js"></script>
     <script defer src="/_vercel/insights/script.js"></script>
 </body>
 

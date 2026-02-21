@@ -40,6 +40,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             populateAnalysis();
             renderSolutions('all');
+
+            // Trigger feedback modal after a short delay
+            setTimeout(() => {
+                if (!sessionStorage.getItem('feedbackShown') && window.Feedback) {
+                    window.Feedback.show();
+                }
+            }, 2500);
+
         } catch (e) {
             alert("Error displaying analysis metrics: " + e.message);
             console.error(e);

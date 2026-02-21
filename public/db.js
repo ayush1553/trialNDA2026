@@ -66,6 +66,20 @@ const DB = {
             count: attempts.length,
             avgAccuracy: (sumAccuracy / attempts.length).toFixed(1)
         };
+    },
+
+    async sendFeedback(feedbackData) {
+        const response = await fetch(`${DB_CONFIG.API_URL}/feedback`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(feedbackData)
+        });
+
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error || 'Failed to send feedback');
+        }
+        return await response.json();
     }
 };
 

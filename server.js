@@ -4,6 +4,7 @@ const { createClient } = require('@supabase/supabase-js');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
+const { Resend } = require('resend');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -330,6 +331,46 @@ app.get('/api/tests', async (req, res) => {
 
     if (error) return res.status(500).json({ error: error.message });
     res.json(data);
+});
+
+// 12. Send Feedback Email
+app.post('/api/feedback', async (req, res) => {
+    const { user_id, test_id, rating, comments, follow_up } = req.body;
+    const resendApiKey = process.env.RESEND_API_KEY;
+    const recipientEmail = process.env.FEEDBACK_RECIPIENT_EMAIL;
+
+    if (!resendApiKey || !recipientEmail) {
+        console.error('Email configuration missing');
+        return res.status(500).json({ error: 'Server handles email incorrectly. Check RESEND_API_KEY and FEEDBACK_RECIPIENT_EMAIL.' });
+    }
+
+    const resend = new Resend(resendApiKey);
+
+    try {
+        const { data, error } = await resend.emails.send({
+            from: 'Feedback <onboarding@resend.dev>',
+            to: [recipientEmail],
+            subject: `New Test Feedback - ID: ${test_id}`,
+            html: `
+                <h2>New Feedback Received</h2>
+                <p><strong>User ID:</strong> ${user_id}</p>
+                <p><strong>Test ID:</strong> ${test_id}</p>
+                <p><strong>Rating:</strong> ${rating}</p>
+                <p><strong>Comments:</strong> ${comments || 'No comments provided'}</p>
+                <p><strong>Allow Follow-up:</strong> ${follow_up ? 'Yes' : 'No'}</p>
+            `
+        });
+
+        if (error) {
+            console.error('Resend Error:', error);
+            return res.status(500).json({ error: error.message });
+        }
+
+        res.json({ success: true, data });
+    } catch (err) {
+        console.error('Internal Server Error:', err);
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Export the app for Vercel
