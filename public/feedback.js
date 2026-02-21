@@ -35,9 +35,6 @@ const Feedback = {
     show() {
         const overlay = document.querySelector('.feedback-modal-overlay');
         if (overlay) overlay.style.display = 'flex';
-
-        // Don't show again in this session
-        sessionStorage.setItem('feedbackShown', 'true');
     },
 
     hide() {

@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Trigger feedback modal after a short delay
             setTimeout(() => {
-                if (!sessionStorage.getItem('feedbackShown') && window.Feedback) {
+                if (window.Feedback) {
                     window.Feedback.show();
                 }
             }, 2500);
